@@ -98,7 +98,7 @@ function _form_html_element($element, $number, $row) {
    switch($element) {
    	case 'row':
          $markup = '<tr><td class="module-row" colspan="2">'.$row['module'].'</td></tr>
-<tr class="even"><td class="checkbox permission">';
+<tr><td class="checkbox permissions">';
       break;
    	case 'item':
          $markup = ' <div class="float-inline"><input disabled="disabled" id="'.$row['module'].'-permission-'.$number.'" name="modules['.$row['module'].']['.$number.'][enable]" value="1" checked="checked" class="form-checkbox" type="checkbox"><label for="'.$row['module'].'-permission-'.$number.'">'.$row['permission'].'</label></div>';
