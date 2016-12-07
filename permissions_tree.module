@@ -24,33 +24,56 @@ function permissions_tree_menu() {
  * Implements the tree view by user.
  */
 function permissions_tree_page() {
+   $output = array();
 	// get array of roles names
    $result = db_select('role', 'r')
-      ->fields('r', array('rid', 'name'))
+      ->fields('r', array('rid', 'name', 'weight'))
+      ->orderBy('weight', 'ASC')
       ->execute();
    while ($record = $result->fetchAssoc()) {
    	$roles[$record['rid']] = $record['name'];
+   	$output[$record['rid']] = array(); 
    }
+   $roles_count = count($roles);
    // gather all permissions ordered
    $result = db_select('role_permission', 'rp')
       ->fields('rp', array('rid', 'permission', 'module'))
       ->orderBy('rid', 'ASC')
       ->orderBy('module', 'ASC')
       ->execute();
-   $output = array();
-   $last = array('rid' => -1, 'permission' => '', 'module' => '');
+   $last = array('rid'=>-1, 'permission'=>'', 'module'=>'');
    $num = 0;
    while ($record = $result->fetchAssoc()) {
    	$num++;
    	if ($record['rid'] != $last['rid']) {
     	   $last['module'] = '';
-      	$output[$record['rid']] = array();
       }
       if ($record['module'] != $last['module']) {
-      	$modules[] = $record['module'];
-       	$output[$record['rid']][$record['module']] = '';
+      	//$modules[] = $record['module'];
+			if (!isset($output[$record['rid']][$record['module']])) {
+       	   $output[$record['rid']][$record['module']] = '';
+       	}
       }
-     	$output[$record['rid']][$record['module']] .= _form_html_element('item', $num, $record);
+     	// avoids duplicated permissions from inheritance
+     	$tempout = trim(strip_tags(_form_html_element('item', $num, $record)));
+     	if (strpos($output[$record['rid']][$record['module']], $tempout) === FALSE) {
+     	   $output[$record['rid']][$record['module']] .= _form_html_element('item', $num, $record);
+     	}
+     	// extends permissions from 'authenticated user' to other roles that are not anonymous
+     	if ($record['rid'] == 2 && $roles_count > 2) {
+     		foreach ($roles as $k=>$v) {
+     			if ($k > 2) {
+     				$tempout = _form_html_element('item', $num, array('rid'=>$k, 'permission'=>$record['permission'], 'module'=>$record['module']));
+
+     				if (isset($output[$k][$record['module']])) {
+     			      $output[$k][$record['module']] .= $tempout;
+     			   }
+     			   else {
+     			   	$output[$k][$record['module']] = str_replace('<label', '<label class="inherited"', $tempout);
+     			   }
+     			}
+         }
+     	}
    	$last = $record;
    }
    
@@ -59,10 +82,12 @@ function permissions_tree_page() {
          '#markup' => '<fieldset class="collapsible form-wrapper role"><legend><span class="fieldset-legend"><a class="fieldset-title" href="#"><span class="fieldset-legend-prefix element-invisible">Hide</span> '.$roles[$rid].'</a><span class="summary"></span></span></legend><div class="fieldset-wrapper" style="">',
       );
       foreach ($module as $name=>$items) {
+      	$itemsarr = explode('<div><input', $items);
+   	   $num = count($itemsarr)-1;
          $pagearr[$rid][$name] = array(
             'fieldset' => array(
                '#type' => 'fieldset',
-               '#title' => $name,
+               '#title' => $name.' ('.$num.')',
                '#attributes' => array('class' => array('collapsible', 'collapsed', 'module')),
                'content' => array(
                   '#markup' => $items,
@@ -95,12 +120,8 @@ function permissions_tree_page() {
  */
 function _form_html_element($element, $number, $row) {
    switch($element) {
-   	case 'row':
-         $markup = '<tr><td class="module-row" colspan="2">'.$row['module'].'</td></tr>
-<tr><td class="checkbox permissions">';
-      break;
    	case 'item':
-         $markup = ' <div><input disabled="disabled" id="'.$row['module'].'-permission-'.$number.'" name="modules['.$row['module'].']['.$number.'][enable]" value="1" checked="checked" class="form-checkbox" type="checkbox"><label for="'.$row['module'].'-permission-'.$number.'">'.$row['permission'].'</label></div>';
+         $markup = ' <div><input disabled="disabled" id="'.$row['module'].'-'.$row['rid'].'-permission-'.$number.'" name="modules['.$row['rid'].']['.$row['module'].']['.$number.'][enable]" value="1" checked="checked" class="form-checkbox" type="checkbox"><label for="'.$row['module'].'-'.$row['rid'].'-permission-'.$number.'">'.$row['permission'].'</label></div>';
       break;
    }
    return $markup;

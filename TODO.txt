@@ -1,5 +1,5 @@
-theme :: 
-drupal :: 
+theme :: Calculate .content width dynamically through js 
+theme :: Finalize styles for Bartik
 
 /====
 ISSUES

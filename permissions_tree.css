@@ -1,15 +1,27 @@
-.page-admin-people-permissions-tree .content {width:200%;}
-
-fieldset.role {float:left;left:0;width:9%;margin:1.5em 1% 0 0;}
+.page-admin-people-permissions-tree .region-content {overflow-x:scroll;overflow-y:visible;padding-bottom:2em;}
+.page-admin-people-permissions-tree .content {width:3000px;}
+fieldset.role {float:left;left:0;width:285px;margin:1.5em 35px 0 0;}
 fieldset.role .fieldset-wrapper {padding:0;}
+fieldset.module {margin:0;}
+fieldset.module .fieldset-legend {text-transform:none;}
+fieldset.module .fieldset-wrapper {padding:.35em 0 .4em 0;}
+fieldset.module label {display:inline;font-weight:normal;padding-left:.3em;}
+fieldset.module label.inherited {color:#800;}
+fieldset.module div {display:block;margin:0;padding:0 .5em;text-align:left;line-height:200%;}
+
 /** th style from Seven */
 fieldset.role .fieldset-wrapper {background-color:#e1e2dc;}
+fieldset.module {background-color:#e1e2dc;border:none;border-top:1px solid #bebfb9;}
+fieldset.module legend {background-color:#e1e2dc;}
+fieldset.module legend a {color:#333;}
+fieldset.module .fieldset-wrapper {background-color:#fff;border-top:1px solid #bebfb9;}
+
 /** th style from Bartik
+fieldset.role .fieldset-wrapper {background-color:rgba(0, 0, 0, 0.51);}
+fieldset.module {background-color:rgba(0, 0, 0, 0.51);border:1px solid #fff;}
+fieldset.module legend {background-color:rgba(0, 0, 0, 0.51);}
+fieldset.module legend a {color:#fff;font-weight:bold;}
+fieldset.module .fieldset-wrapper {background-color:#eee;}
+
 td.module-row {padding:4px 9px;text-align:left;border:1px solid #fff;background:rgba(0, 0, 0, 0.51) none repeat scroll 0 0;border-bottom-style:none;}
 td.module-row, td.module-row a, td.module-row a:hover {color:#fff;font-weight:bold;} */
-
-fieldset.module {margin:0;background-color:#e1e2dc;border:none;border-top:1px solid #bebfb9;}
-fieldset.module legend {font-weight:normal;background-color:#e1e2dc;}
-fieldset.module .fieldset-wrapper {padding:.35em 0 .4em 0;background-color:#fff;border-top:1px solid #bebfb9;}
-fieldset.module label {display:inline;font-weight:normal;padding-left:.3em;}
-fieldset.module div {display:block;margin:0;padding:0 .5em;text-align:left;line-height:200%;}
