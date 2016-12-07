@@ -1,0 +1,10 @@
+name = Permissions Tree
+description = Displays all enabled permissions by role in a tree.
+package = Development
+core = 7.x
+
+; Information added by me
+version = "7.x-1.0-dev"
+core = "7.x"
+project = "permissions_tree"
+datestamp = "1427458188"

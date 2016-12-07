@@ -1,0 +1,102 @@
+<?php
+/**
+ * @file
+ * Code for the ...
+ * on demand to save memory consumption during normal site operation.
+ */
+
+/**
+ * Adds the menu tab for its page.
+ */
+function permissions_tree_menu() {
+    $items['admin/people/permissions/tree'] = array(
+      'title' => 'Tree',
+      'description' => 'Tree view by role of all enabled permissions.',
+      'page callback' => 'permissions_tree_page',
+      'access arguments' => array('administer site configuration'),
+      'type' => MENU_LOCAL_TASK,
+   );  
+   return $items;
+}
+
+
+/**
+ * Implements the tree view by user.
+ */
+function permissions_tree_page() {
+	// get array of roles names
+   $result = db_select('role', 'r')
+      ->fields('r', array('rid', 'name'))
+      ->execute();
+   while ($record = $result->fetchAssoc()) {
+   	$roles[$record['rid']] = $record['name'];
+   }
+   // gather all permissions ordered
+   $result = db_select('role_permission', 'rp')
+      ->fields('rp', array('rid', 'permission', 'module'))
+      ->orderBy('rid', 'ASC')
+      ->orderBy('module', 'ASC')
+      ->execute();
+   $output = '';
+   $last = array('rid' => -1, 'permission' => '', 'module' => '');
+   $evodd = 'even';
+   $num = 0;
+   while ($record = $result->fetchAssoc()) {
+   	$evodd = ($evodd == 'even' ? 'odd' : 'even');
+   	$num++;
+   	if ($record['rid'] != $last['rid']) {
+      	// close previous role fieldset
+      	if ($last['rid'] != -1) {
+            $output .= _form_html_element('fieldset', 'end', '', 0, $record, $roles);
+      	}
+      	$last['module'] = '';
+      	// new role fieldset
+      	$output .= _form_html_element('fieldset', 'begin', '', 0, $record, $roles);
+      }
+      if ($record['module'] != $last['module']) { 
+       	// new module title row
+       	$stripe = 'odd';
+       	$output .= _form_html_element('title-row', 'both', 'odd', 0, $record, $roles);
+      }
+     	$output .= _form_html_element('row', 'both', $evodd, $num, $record, $roles);
+   	$last = $record;
+   }
+   $output .= _form_html_element('fieldset', 'end', '', 0, $last, $roles);
+   
+   $page_array['permissions'] = array(
+      //Title serves as page subtitle
+      '#title' => t('All posts from the last week'),
+      '#markup' => $output,
+    );
+    return $page_array;  
+}
+
+
+/**
+ * Helper function.
+ */
+function _form_html_element($element, $part, $stripe, $number, $row, $roles) {
+   switch($element) {
+   	case 'fieldset':
+         $markup['begin'] = '<fieldset class="collapsible form-wrapper collapsible" id="role-'.$row['rid'].'-enabled-permissions">
+<legend><span class="fieldset-legend"><a class="fieldset-title" href="#"><span class="fieldset-legend-prefix element-invisible">Show</span> '.$roles[$row['rid']].'</a><span class="summary"></span></span></legend>
+<div class="fieldset-wrapper">
+<table>
+<tbody>
+';
+         $markup['end'] = '</tbody>
+</table>
+</div></fieldset>
+';
+      break;
+   	case 'title-row':
+         $markup['both'] = '<tr class="odd"><td class="module-row" colspan="2">'.$row['module'].'</td></tr>
+';
+      break;
+   	case 'row':
+         $markup['both'] = '<tr class="'.$stripe.'"><td class="checkbox"><div class="form-item form-type-checkbox form-disabled"> <input disabled="disabled" id="'.$row['module'].'-permission-'.$number.'" name="modules['.$row['module'].']['.$number.'][enable]" value="1" checked="checked" class="form-checkbox" type="checkbox"> </div> </td><td><label for="'.$row['module'].'-permission-'.$number.'">'.$row['permission'].'</label></td></tr>
+';
+      break;
+   }
+   return $markup[$part];
+}
