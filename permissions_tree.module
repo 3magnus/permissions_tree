@@ -39,64 +39,70 @@ function permissions_tree_page() {
       ->execute();
    $output = '';
    $last = array('rid' => -1, 'permission' => '', 'module' => '');
-   $evodd = 'even';
    $num = 0;
    while ($record = $result->fetchAssoc()) {
-   	$evodd = ($evodd == 'even' ? 'odd' : 'even');
    	$num++;
    	if ($record['rid'] != $last['rid']) {
-      	// close previous role fieldset
+      	// close previous role table
       	if ($last['rid'] != -1) {
-            $output .= _form_html_element('fieldset', 'end', '', 0, $record, $roles);
+            $output .= "</tbody></table>\n";
+      	   $last['module'] = '';
       	}
-      	$last['module'] = '';
-      	// new role fieldset
-      	$output .= _form_html_element('fieldset', 'begin', '', 0, $record, $roles);
+      	// new role table
+      	$output .= '<table id="rid-'.$record['rid'].'"><tbody>
+';
       }
-      if ($record['module'] != $last['module']) { 
+      if ($record['module'] != $last['module']) {
+      	if ($last['rid'] != -1) {
+      	   $output .= "</td></tr>\n";
+      	} 
        	// new module title row
-       	$stripe = 'odd';
-       	$output .= _form_html_element('title-row', 'both', 'odd', 0, $record, $roles);
+       	$output .= _form_html_element('row', 0, $record);
       }
-     	$output .= _form_html_element('row', 'both', $evodd, $num, $record, $roles);
+     	$output .= _form_html_element('item', $num, $record);
    	$last = $record;
    }
-   $output .= _form_html_element('fieldset', 'end', '', 0, $last, $roles);
+   $output .= "</tbody></table>\n";
    
-   $page_array['permissions'] = array(
-      //Title serves as page subtitle
-      '#title' => t('All posts from the last week'),
-      '#markup' => $output,
-    );
-    return $page_array;  
+   $outarr = explode('<table id="rid-', $output);
+   unset($outarr[0]);
+   foreach ($outarr as $k=>$table) {
+      $pagearr['role-'.$k] = array(
+         'fieldset' => array(
+            '#type' => 'fieldset',
+            '#title' => $roles[$k],
+            '#attributes' => array('class' => array('collapsible', 'collapsed')),
+            'content' => array(
+               '#markup' => '<table id="rid-'.$table,
+            ),
+         ),
+         '#attached' => array(
+            'js' => array(
+               'misc/collapse.js',
+               'misc/form.js',
+            ),
+            'css' => array(
+               drupal_get_path('module', 'permissions_tree').'/permissions_tree.css',
+            ),
+         ),
+      );
+   }
+   return $pagearr;  
 }
 
 
 /**
  * Helper function.
  */
-function _form_html_element($element, $part, $stripe, $number, $row, $roles) {
+function _form_html_element($element, $number, $row) {
    switch($element) {
-   	case 'fieldset':
-         $markup['begin'] = '<fieldset class="collapsible form-wrapper collapsible" id="role-'.$row['rid'].'-enabled-permissions">
-<legend><span class="fieldset-legend"><a class="fieldset-title" href="#"><span class="fieldset-legend-prefix element-invisible">Show</span> '.$roles[$row['rid']].'</a><span class="summary"></span></span></legend>
-<div class="fieldset-wrapper">
-<table>
-<tbody>
-';
-         $markup['end'] = '</tbody>
-</table>
-</div></fieldset>
-';
-      break;
-   	case 'title-row':
-         $markup['both'] = '<tr class="odd"><td class="module-row" colspan="2">'.$row['module'].'</td></tr>
-';
-      break;
    	case 'row':
-         $markup['both'] = '<tr class="'.$stripe.'"><td class="checkbox"><div class="form-item form-type-checkbox form-disabled"> <input disabled="disabled" id="'.$row['module'].'-permission-'.$number.'" name="modules['.$row['module'].']['.$number.'][enable]" value="1" checked="checked" class="form-checkbox" type="checkbox"> </div> </td><td><label for="'.$row['module'].'-permission-'.$number.'">'.$row['permission'].'</label></td></tr>
-';
+         $markup = '<tr><td class="module-row" colspan="2">'.$row['module'].'</td></tr>
+<tr class="even"><td class="checkbox permission">';
+      break;
+   	case 'item':
+         $markup = ' <div class="float-inline"><input disabled="disabled" id="'.$row['module'].'-permission-'.$number.'" name="modules['.$row['module'].']['.$number.'][enable]" value="1" checked="checked" class="form-checkbox" type="checkbox"><label for="'.$row['module'].'-permission-'.$number.'">'.$row['permission'].'</label></div>';
       break;
    }
-   return $markup[$part];
+   return $markup;
 }

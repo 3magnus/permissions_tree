@@ -1,0 +1,7 @@
+/** th style from Seven 
+td.module-row {padding:3px 10px;text-transform:uppercase;font-weight:normal;background: #e1e2dc none repeat scroll 0 0;border:1px solid #bebfb9;} */
+/** th style from Bartik */
+td.module-row {padding:4px 9px;text-align:left;border:1px solid #fff;background:rgba(0, 0, 0, 0.51) none repeat scroll 0 0;border-bottom-style:none;}
+td.module-row, td.module-row a, td.module-row a:hover {color:#fff;font-weight:bold;}
+td.permission label {display:inline;font-weight:normal;padding-left:.3em;}
+.float-inline {display:inline-block;float:left;left:0;margin:.25em 2em .25em 0;}
