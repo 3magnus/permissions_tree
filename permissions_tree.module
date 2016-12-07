@@ -37,56 +37,55 @@ function permissions_tree_page() {
       ->orderBy('rid', 'ASC')
       ->orderBy('module', 'ASC')
       ->execute();
-   $output = '';
+   $output = array();
    $last = array('rid' => -1, 'permission' => '', 'module' => '');
    $num = 0;
    while ($record = $result->fetchAssoc()) {
    	$num++;
    	if ($record['rid'] != $last['rid']) {
-      	// close previous role table
-      	if ($last['rid'] != -1) {
-            $output .= "</tbody></table>\n";
-      	   $last['module'] = '';
-      	}
-      	// new role table
-      	$output .= '<table id="rid-'.$record['rid'].'"><tbody>
-';
+    	   $last['module'] = '';
+      	$output[$record['rid']] = array();
       }
       if ($record['module'] != $last['module']) {
-      	if ($last['rid'] != -1) {
-      	   $output .= "</td></tr>\n";
-      	} 
-       	// new module title row
-       	$output .= _form_html_element('row', 0, $record);
+      	$modules[] = $record['module'];
+       	$output[$record['rid']][$record['module']] = '';
       }
-     	$output .= _form_html_element('item', $num, $record);
+     	$output[$record['rid']][$record['module']] .= _form_html_element('item', $num, $record);
    	$last = $record;
    }
-   $output .= "</tbody></table>\n";
    
-   $outarr = explode('<table id="rid-', $output);
-   unset($outarr[0]);
-   foreach ($outarr as $k=>$table) {
-      $pagearr['role-'.$k] = array(
-         'fieldset' => array(
-            '#type' => 'fieldset',
-            '#title' => $roles[$k],
-            '#attributes' => array('class' => array('collapsible', 'collapsed')),
-            'content' => array(
-               '#markup' => '<table id="rid-'.$table,
+   foreach ($output as $rid=>$module) {
+      $pagearr[$rid]['fieldset-open'] = array(
+         '#markup' => '<fieldset class="collapsible form-wrapper role"><legend><span class="fieldset-legend"><a class="fieldset-title" href="#"><span class="fieldset-legend-prefix element-invisible">Hide</span> '.$roles[$rid].'</a><span class="summary"></span></span></legend><div class="fieldset-wrapper" style="">',
+      );
+      foreach ($module as $name=>$items) {
+         $pagearr[$rid][$name] = array(
+            'fieldset' => array(
+               '#type' => 'fieldset',
+               '#title' => $name,
+               '#attributes' => array('class' => array('collapsible', 'collapsed', 'module')),
+               'content' => array(
+                  '#markup' => $items,
+               ),
             ),
-         ),
-         '#attached' => array(
-            'js' => array(
-               'misc/collapse.js',
-               'misc/form.js',
-            ),
-            'css' => array(
-               drupal_get_path('module', 'permissions_tree').'/permissions_tree.css',
-            ),
-         ),
+         );
+      }
+      $pagearr[$rid]['fieldset-close'] = array(
+         '#markup' => '</div></fieldset>',
       );
    }
+   $pagearr['options'] = array(
+      '#markup' => '',
+      '#attached' => array(
+         'js' => array(
+            'misc/collapse.js',
+            'misc/form.js',
+         ),
+         'css' => array(
+            drupal_get_path('module', 'permissions_tree').'/permissions_tree.css',
+         ),
+      ),
+   );
    return $pagearr;  
 }
 
@@ -101,7 +100,7 @@ function _form_html_element($element, $number, $row) {
 <tr><td class="checkbox permissions">';
       break;
    	case 'item':
-         $markup = ' <div class="float-inline"><input disabled="disabled" id="'.$row['module'].'-permission-'.$number.'" name="modules['.$row['module'].']['.$number.'][enable]" value="1" checked="checked" class="form-checkbox" type="checkbox"><label for="'.$row['module'].'-permission-'.$number.'">'.$row['permission'].'</label></div>';
+         $markup = ' <div><input disabled="disabled" id="'.$row['module'].'-permission-'.$number.'" name="modules['.$row['module'].']['.$number.'][enable]" value="1" checked="checked" class="form-checkbox" type="checkbox"><label for="'.$row['module'].'-permission-'.$number.'">'.$row['permission'].'</label></div>';
       break;
    }
    return $markup;
