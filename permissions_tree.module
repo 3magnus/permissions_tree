@@ -64,9 +64,8 @@ function permissions_tree_page() {
      		foreach ($roles as $k=>$v) {
      			if ($k > 2) {
      				$tempout = _form_html_element('item', $num, array('rid'=>$k, 'permission'=>$record['permission'], 'module'=>$record['module']));
-
      				if (isset($output[$k][$record['module']])) {
-     			      $output[$k][$record['module']] .= $tempout;
+     			      $output[$k][$record['module']] .= str_replace('<label', '<label class="inherited"', $tempout);
      			   }
      			   else {
      			   	$output[$k][$record['module']] = str_replace('<label', '<label class="inherited"', $tempout);
