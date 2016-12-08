@@ -1,7 +1,9 @@
 theme :: Finalize styles for Bartik
-theme :: Calculate .content width dynamically through js 
+theme :: Calculate .content width dynamically through js
+interf :: Implement js checkbox filter "Display inherited permissions" 
+interf :: MAYBE build a working form to allow disabling permissions
 
 /====
 ISSUES
 ====/
-> 
+> Change outer fieldsets being built by text into some render function for inner fieldsets
